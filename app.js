@@ -39,9 +39,12 @@
 // 	chart.render();
 // }
 
+let globalData;
+
 async function getSummary() {
 	const res = await fetch('https://api.covid19api.com/summary');
 	const data = await res.json();
+	globalData = data;
 	const global = data.Global;
 	const newConfirmedLabel = document.querySelector('span.new-confirmed-count');
 	const newDeathsLabel = document.querySelector('span.new-deaths-count');
@@ -55,6 +58,41 @@ async function getSummary() {
 	totalConfirmedLabel.innerText = global.TotalConfirmed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	totalDeathsLabel.innerText = global.TotalDeaths.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	totalRecoveredLabel.innerText = global.TotalRecovered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+	renderMainTable(globalData.Countries);
 }
 
+async function renderMainTable(data) {
+	console.log(data);
+	const removeTableLeaveHeaders = document.querySelectorAll('.main-table-body tr:not(:first-child)');
+	removeTableLeaveHeaders.forEach(tr => tr.remove());
+	console.log(removeTableLeaveHeaders);
+	const mainTableBody = document.querySelector('.main-table-body');
+	data.forEach(el => {
+		const newTr = document.createElement('tr');
+		const { Country, NewConfirmed, NewDeaths, NewRecovered, TotalConfirmed, TotalDeaths, TotalRecovered } = el;
+		const ActiveCases = TotalConfirmed - TotalDeaths - TotalRecovered;
+		const dataArr = [
+			Country,
+			NewConfirmed,
+			TotalConfirmed,
+			NewDeaths,
+			TotalDeaths,
+			NewRecovered,
+			TotalRecovered,
+			ActiveCases
+		];
+		for (let data of dataArr) {
+			const newCell = document.createElement('td');
+			newCell.innerText = data;
+			newTr.appendChild(newCell);
+		}
+		mainTableBody.appendChild(newTr);
+	});
+}
+
+function sort() {
+	const data = [ ...globalData.Countries ];
+	let sorted = data.sort((a, b) => b.TotalConfirmed - a.TotalConfirmed);
+	renderMainTable(sorted);
+}
 getSummary();

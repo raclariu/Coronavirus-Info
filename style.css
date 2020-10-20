@@ -10,13 +10,13 @@ html {
 }
 
 body {
-    width: 70vw;
+    width: 60vw;
     margin: auto;
 }
 
 #summary {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
 }
@@ -24,7 +24,7 @@ body {
 .summary-data {
     width: 30%;
     height: 90px;
-    margin-top: 30px;
+    margin-top: 20px;
     border-radius: 10px;
     text-align: center;
     background-color: rgb(250, 250, 250);
@@ -64,4 +64,34 @@ i.fa-virus, div span.total-confirmed-label, div span.new-confirmed-label {
 
 .summary-data span.count {
     font-size: 35px;
+}
+
+/* Main Table */
+
+#main-table-section {
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: auto;
+}
+
+th {
+    text-align: center;
+    height: 40px;
+    border: 2px solid rgb(68, 68, 68);
+    color: rgb(68, 68, 68);
+    background-color: rgb(226, 226, 226);
+    padding: 5px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+td {
+    text-align: left;
+    border: 1px solid rgb(182, 182, 182);
+    padding: 10px;
+    font-weight: 500;
 }
