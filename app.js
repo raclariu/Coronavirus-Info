@@ -40,6 +40,7 @@
 // }
 
 let globalData;
+const allTableHeaders = document.querySelectorAll('th');
 
 async function getSummary() {
 	const res = await fetch('https://api.covid19api.com/summary');
@@ -58,14 +59,12 @@ async function getSummary() {
 	totalConfirmedLabel.innerText = global.TotalConfirmed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	totalDeathsLabel.innerText = global.TotalDeaths.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	totalRecoveredLabel.innerText = global.TotalRecovered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-	renderMainTable(globalData.Countries);
+	renderMainTable(data.Countries);
 }
 
 async function renderMainTable(data) {
-	console.log(data);
 	const removeTableLeaveHeaders = document.querySelectorAll('.main-table-body tr:not(:first-child)');
 	removeTableLeaveHeaders.forEach(tr => tr.remove());
-	console.log(removeTableLeaveHeaders);
 	const mainTableBody = document.querySelector('.main-table-body');
 	data.forEach(el => {
 		const newTr = document.createElement('tr');
@@ -81,18 +80,60 @@ async function renderMainTable(data) {
 			TotalRecovered,
 			ActiveCases
 		];
-		for (let data of dataArr) {
+		for (let item of dataArr) {
 			const newCell = document.createElement('td');
-			newCell.innerText = data;
+			newCell.innerText = item.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 			newTr.appendChild(newCell);
 		}
 		mainTableBody.appendChild(newTr);
 	});
 }
 
-function sort() {
+function sortMainTableCols(clickedOn, e) {
 	const data = [ ...globalData.Countries ];
-	let sorted = data.sort((a, b) => b.TotalConfirmed - a.TotalConfirmed);
+	data.forEach(obj => {
+		obj.ActiveCases = obj.TotalConfirmed - obj.TotalDeaths - obj.TotalRecovered;
+	});
+
+	allTableHeaders.forEach(header => {
+		if (header !== e.target) {
+			header.classList.remove('sorted');
+		}
+	});
+
+	let sorted = data.sort((a, b) => {
+		let first = a[clickedOn];
+		let second = b[clickedOn];
+		if (e.target.classList.contains('sorted')) {
+			if (first > second) return -1;
+			if (second > first) return 1;
+		} else {
+			if (first > second) return 1;
+			if (second > first) return -1;
+		}
+	});
 	renderMainTable(sorted);
 }
+
+// Event listeners
+
+allTableHeaders.forEach(header => {
+	header.addEventListener('click', e => {
+		e.target.classList.toggle('sorted');
+		const clickedOn = e.target.dataset.header;
+		sortMainTableCols(clickedOn, e);
+	});
+});
+
+// add chart below clicked table row country
+function test() {
+	const trNoHeader = document.querySelectorAll('.main-table-body tr:not(:first-child)');
+	trNoHeader.forEach(el => {
+		el.addEventListener('click', e => {
+			console.log(e.target);
+			console.dir(e.target);
+		});
+	});
+}
+
 getSummary();

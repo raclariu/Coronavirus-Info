@@ -73,6 +73,7 @@ i.fa-virus, div span.total-confirmed-label, div span.new-confirmed-label {
 }
 
 table {
+    table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
     margin: auto;
@@ -81,17 +82,28 @@ table {
 th {
     text-align: center;
     height: 40px;
-    border: 2px solid rgb(68, 68, 68);
+    border: 2px solid rgb(146, 146, 146);
     color: rgb(68, 68, 68);
     background-color: rgb(226, 226, 226);
     padding: 5px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: bold;
+    width: 12.5%;
 }
 
 td {
-    text-align: left;
+    text-align: right;
     border: 1px solid rgb(182, 182, 182);
     padding: 10px;
     font-weight: 500;
 }
+
+td:first-child {
+    text-align: left;
+}
+
+tbody tr th:first-child {
+    width: 25%;
+}
+
+.fa-sort-amount-down {}
