@@ -106,4 +106,6 @@ tbody tr th:first-child {
     width: 25%;
 }
 
-.fa-sort-amount-down {}
+tr .chart {
+    border: 1px solid rgb(182, 182, 182);
+}
