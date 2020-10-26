@@ -1,5 +1,5 @@
 let globalData;
-const allTableHeaders = document.querySelectorAll('th');
+const allTableHeaders = document.querySelectorAll('.main-table-header');
 
 async function getSummary() {
 	const res = await fetch('https://api.covid19api.com/summary');
@@ -26,11 +26,12 @@ async function renderMainTable(data) {
 	if (chart !== null) {
 		chart.remove();
 	}
-	const removeTableLeaveHeaders = document.querySelectorAll('.main-table-body tr:not(:first-child)');
-	removeTableLeaveHeaders.forEach(tr => tr.remove());
-	const mainTableBody = document.querySelector('.main-table-body');
+	const removeTableLeaveHeaders = document.querySelectorAll('#main-table-section>div>div:not(:first-child)');
+	removeTableLeaveHeaders.forEach(row => row.remove());
+	const mainTableBody = document.querySelector('.main-table');
 	data.forEach(el => {
-		const newTr = document.createElement('tr');
+		const newRow = document.createElement('div');
+		newRow.classList.add('main-table-row');
 		const { Country, NewConfirmed, NewDeaths, NewRecovered, TotalConfirmed, TotalDeaths, TotalRecovered } = el;
 		const ActiveCases = TotalConfirmed - TotalDeaths - TotalRecovered;
 		const dataArr = [
@@ -44,11 +45,12 @@ async function renderMainTable(data) {
 			ActiveCases
 		];
 		for (let item of dataArr) {
-			const newCell = document.createElement('td');
+			const newCell = document.createElement('div');
+			newCell.classList.add('main-table-cell');
 			newCell.innerText = item.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			newTr.appendChild(newCell);
+			newRow.appendChild(newCell);
 		}
-		mainTableBody.appendChild(newTr);
+		mainTableBody.appendChild(newRow);
 	});
 }
 
@@ -75,6 +77,7 @@ function sortMainTableCols(clickedOn, e) {
 			if (second > first) return -1;
 		}
 	});
+	console.log(sorted);
 	renderMainTable(sorted);
 	test();
 }
@@ -85,6 +88,7 @@ allTableHeaders.forEach(header => {
 	header.addEventListener('click', e => {
 		e.target.classList.toggle('sorted');
 		const clickedOn = e.target.dataset.header;
+		console.log(clickedOn);
 		sortMainTableCols(clickedOn, e);
 	});
 });
@@ -98,21 +102,25 @@ window.addEventListener('load', callThings);
 // add chart below clicked table row country
 let country = '';
 function test() {
-	const trNoHeader = document.querySelectorAll('.main-table-body tr:not(:first-child) td:first-child');
-	trNoHeader.forEach(el => {
+	const countryCell = document.querySelectorAll('.main-table-cell:first-child:not(.chart)');
+	console.log(countryCell);
+	countryCell.forEach(el => {
 		el.addEventListener('click', e => {
-			const el = document.querySelector('.chart');
-			console.dir(el);
+			const chart = document.querySelector('.chart');
+			console.dir(chart);
 			console.dir(e.target);
-			if (el !== null) {
-				el.remove();
+			if (chart !== null) {
+				chart.remove();
 			}
 
 			country = e.target.innerText.toLowerCase().replace('(', '').replace(')', '');
 			const clickedParent = e.target.parentElement;
+			const newRow = document.createElement('div');
+			newRow.classList.add('chart-container');
 			const newDiv = document.createElement('div');
 			newDiv.classList.add('chart');
-			clickedParent.insertAdjacentElement('afterend', newDiv);
+			newRow.appendChild(newDiv);
+			clickedParent.insertAdjacentElement('afterend', newRow);
 			console.log(country);
 			if (country) {
 				getData(country);
@@ -121,12 +129,22 @@ function test() {
 	});
 }
 
+const picker = document.querySelector('#picker');
+flatpickr(picker, {
+	mode       : 'range',
+	maxDate    : 'today',
+	dateFormat : 'Y-m-d'
+});
+
 async function getData(country) {
 	console.log(country);
 	let arr = [];
+	const firstDate = dayjs().subtract(14, 'days').format('YYYY-MM-DD') + 'T00:00:00Z';
+	const today = dayjs().format('YYYY-MM-DD') + 'T00:00:00Z';
 	const res = await fetch(
-		`https://api.covid19api.com/total/country/${country}/status/confirmed?from=2020-10-01T00:00:00Z&to=2020-10-21T00:00:00Z`
+		`https://api.covid19api.com/total/country/${country}/status/confirmed?from=${firstDate}&to=${today}`
 	);
+	console.log(`https://api.covid19api.com/total/country/${country}/status/confirmed?from=${firstDate}&to=${today}`);
 	const data = await res.json();
 	console.log(data);
 	data.forEach(element => {
@@ -135,7 +153,6 @@ async function getData(country) {
 	let options = {
 		chart  : {
 			height : 400,
-			width  : 1150,
 			type   : 'area'
 		},
 		series : [
