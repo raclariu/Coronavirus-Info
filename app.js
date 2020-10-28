@@ -73,6 +73,7 @@ async function renderMainTable(data) {
 		}
 		mainTableBody.appendChild(newRow);
 	});
+	createChartContainer();
 }
 
 // Function that sorts column tables when a table header is clicked
