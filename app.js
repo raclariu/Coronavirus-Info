@@ -26,13 +26,33 @@ async function renderMainTable(data) {
 	if (chart !== null) {
 		chart.remove();
 	}
+
+	// Create a copy of the main data array and add a population key and values for each country
+	const res = await fetch('https://restcountries.eu/rest/v2/all?fields=name;population;alpha2Code');
+	const popData = await res.json();
+	for (let corObj of data) {
+		for (let popObj of popData) {
+			if (corObj.CountryCode === popObj.alpha2Code) {
+				corObj.Population = popObj.population;
+			}
+		}
+	}
 	const removeTableLeaveHeaders = document.querySelectorAll('#main-table-section>div>div:not(:first-child)');
 	removeTableLeaveHeaders.forEach(row => row.remove());
 	const mainTableBody = document.querySelector('.main-table');
 	data.forEach(el => {
 		const newRow = document.createElement('div');
 		newRow.classList.add('main-table-row');
-		const { Country, NewConfirmed, NewDeaths, NewRecovered, TotalConfirmed, TotalDeaths, TotalRecovered } = el;
+		const {
+			Country,
+			NewConfirmed,
+			NewDeaths,
+			NewRecovered,
+			TotalConfirmed,
+			TotalDeaths,
+			TotalRecovered,
+			Population
+		} = el;
 		const ActiveCases = TotalConfirmed - TotalDeaths - TotalRecovered;
 		const dataArr = [
 			Country,
@@ -42,7 +62,8 @@ async function renderMainTable(data) {
 			TotalDeaths,
 			NewRecovered,
 			TotalRecovered,
-			ActiveCases
+			ActiveCases,
+			Population
 		];
 		for (let item of dataArr) {
 			const newCell = document.createElement('div');
@@ -56,8 +77,7 @@ async function renderMainTable(data) {
 
 // Function that sorts column tables when a table header is clicked
 function sortMainTableCols(clickedOn, e) {
-	// Copy the countries data array as we don't want to mutate the original
-	const data = [ ...globalData.Countries ];
+	const data = globalData.Countries;
 
 	// Add a new key/value to each object in data array that represents the active coronavirus cases
 	data.forEach(obj => {
@@ -185,6 +205,9 @@ function renderChart(data) {
 		chart      : {
 			height     : 400,
 			type       : 'line',
+			animations : {
+				enabled : false
+			},
 			dropShadow : {
 				enabled : true,
 				color   : '#000',
