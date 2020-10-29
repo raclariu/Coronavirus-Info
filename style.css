@@ -136,6 +136,10 @@ i.fa-virus, div span.total-confirmed-label, div span.new-confirmed-label {
     cursor: pointer;
     border-radius: 25px;
     margin-top: 15px;
+    margin-bottom: 15px;
+    width: 200px;
+    border: 2px solid rgb(78, 125, 228);
+    color: rgb(78, 125, 228);
     text-align: center;
     font-weight: bold;
 }

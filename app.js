@@ -2,7 +2,7 @@ let globalData;
 const allTableHeaders = document.querySelectorAll('.main-table-header');
 
 async function getSummary() {
-	const res = await fetch('https://api.covid19api.com/summary');
+	const res = await fetch('https://cors-anywhere.herokuapp.com/https://api.covid19api.com/summary');
 	const data = await res.json();
 	globalData = data;
 	const global = data.Global;
@@ -128,8 +128,8 @@ allTableHeaders.forEach(header => {
 window.addEventListener('load', callThings);
 
 // Function that deals with creating a new chart container element everytime a country cell is clicked
+let country = '';
 function createChartContainer() {
-	let country = '';
 	// Select all cells with a country name in it
 	const countryCells = document.querySelectorAll('.main-table-cell:first-child:not(.chart)');
 	countryCells.forEach(cell => {
@@ -157,6 +157,9 @@ function createChartContainer() {
 			const newChart = document.createElement('div');
 			newChart.classList.add('chart');
 			newChartContainer.appendChild(newChart);
+			const picker = document.createElement('input');
+			picker.classList.add('picker');
+			newChart.parentElement.prepend(picker);
 
 			// Get country name and call getData function
 			country = e.target.innerText.toLowerCase().replace('(', '').replace(')', '');
@@ -165,12 +168,14 @@ function createChartContainer() {
 	});
 }
 
-async function getData(country) {
+async function getData(country, date1, date2) {
 	// Create dates to use in the api call
+	console.log(date1, date2);
 	const firstDate = dayjs().subtract(14, 'days').format('YYYY-MM-DD') + 'T00:00:00Z';
 	const today = dayjs().format('YYYY-MM-DD') + 'T00:00:00Z';
 	const res = await fetch(
-		`https://api.covid19api.com/total/country/${country}/status/confirmed?from=${firstDate}&to=${today}`
+		`https://api.covid19api.com/total/country/${country}/status/confirmed?from=${date1 || firstDate}&to=${date2 ||
+			today}`
 	);
 	const data = await res.json();
 
@@ -180,21 +185,28 @@ async function getData(country) {
 		chartDataArr.push({ x: element.Date.replace('T00:00:00Z', ''), y: element.Cases });
 	});
 
-	// Use array as an argument when calling renderChart
+	// Use chartDataArr as an argument when calling renderChart
 	renderChart(chartDataArr);
 }
 
-function datePickerRender(chart) {
+function datePickerRender() {
 	console.log('DATEPICKERRENDER');
-
 	// Create a new input element for the date picker and render it
-	const picker = document.createElement('input');
-	picker.classList.add('picker');
-	chart.parentElement.prepend(picker);
+	const picker = document.querySelector('.picker');
 	flatpickr(picker, {
 		mode       : 'range',
 		maxDate    : 'today',
-		dateFormat : 'Y-m-d'
+		dateFormat : 'Y-m-d',
+		onClose    : function(selectedDates, dateStr, instance) {
+			console.log('selectedDates', selectedDates);
+			console.log('dateStr', dateStr);
+			console.log('instance', instance);
+			const split = dateStr.split(' to ');
+			const date1 = split[0] + 'T00:00:00Z';
+			const date2 = split[1] + 'T00:00:00Z';
+			console.log(date1, date2);
+			getData(country, date1, date2);
+		}
 	});
 }
 
@@ -256,7 +268,7 @@ function renderChart(data) {
 	chart.render();
 
 	// Call datePickerRender so that a date picker will be prepended to the chartEl
-	datePickerRender(chartEl);
+	datePickerRender();
 }
 
 async function callThings() {
