@@ -2,7 +2,7 @@ let globalData;
 const allTableHeaders = document.querySelectorAll('.main-table-header');
 
 async function getSummary() {
-	const res = await fetch('https://cors-anywhere.herokuapp.com/https://api.covid19api.com/summary');
+	const res = await fetch('https://api.covid19api.com/summary');
 	const data = await res.json();
 	globalData = data;
 	const global = data.Global;
@@ -87,7 +87,6 @@ function sortMainTableCols(clickedOn, e) {
 
 	// Only the clicked header should have the 'sorted' class
 	allTableHeaders.forEach(header => {
-		console.log(header);
 		if (header !== e.target) {
 			header.classList.remove('sorted');
 		}
@@ -170,7 +169,6 @@ function createChartContainer() {
 
 async function getData(country, date1, date2) {
 	// Create dates to use in the api call
-	console.log(date1, date2);
 	const firstDate = dayjs().subtract(14, 'days').format('YYYY-MM-DD') + 'T00:00:00Z';
 	const today = dayjs().format('YYYY-MM-DD') + 'T00:00:00Z';
 	const res = await fetch(
@@ -190,7 +188,6 @@ async function getData(country, date1, date2) {
 }
 
 function datePickerRender() {
-	console.log('DATEPICKERRENDER');
 	// Create a new input element for the date picker and render it
 	const picker = document.querySelector('.picker');
 	flatpickr(picker, {
@@ -198,21 +195,15 @@ function datePickerRender() {
 		maxDate    : 'today',
 		dateFormat : 'Y-m-d',
 		onClose    : function(selectedDates, dateStr, instance) {
-			console.log('selectedDates', selectedDates);
-			console.log('dateStr', dateStr);
-			console.log('instance', instance);
 			const split = dateStr.split(' to ');
 			const date1 = split[0] + 'T00:00:00Z';
 			const date2 = split[1] + 'T00:00:00Z';
-			console.log(date1, date2);
 			getData(country, date1, date2);
 		}
 	});
 }
 
 function renderChart(data) {
-	console.log('RENDERCHART');
-
 	// Create chart options
 	let options = {
 		chart      : {
